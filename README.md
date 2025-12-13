@@ -355,3 +355,47 @@ index demo.html;
     return 404; # managed by Certbot
 
 }}
+
+user www-data;
+worker_processes auto;
+
+events {
+worker_connections 768;
+}
+
+http {
+server_tokens off;
+sendfile on;
+access_log /var/log/nginx/access.log;
+error_log /var/log/nginx/error.log;
+server {
+root /var/www/demo;
+index demo.html;
+location = /about {
+try_files /about.html =404;
+}
+#location / { # proxy_pass http://localhost:3000; # proxy_set_header Host $host; # proxy_set_header X-Real-IP $remote_addr; # proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # proxy_set_header X-Forwarded-Proto $scheme;
+#}
+
+                server_name greyghost-back.work.gd www.greyghost-back.work.gd;
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/greyghost-back.work.gd/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/greyghost-back.work.gd/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+        server {
+    if ($host = greyghost-back.work.gd) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+
+                listen 80;
+                server_name greyghost-back.work.gd www.greyghost-back.work.gd;
+    return 404; # managed by Certbot
+
+}}
