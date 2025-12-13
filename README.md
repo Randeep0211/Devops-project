@@ -252,35 +252,106 @@ Ingress :- Kubernetes resource & controller for using LB of different enterprise
 
 SSL - security, Lecture with sinha
 
+user www-data;
+worker_processes auto;
+
+events {
+worker_connections 768;
+}
+
+http {
+include /etc/nginx/mime.types;
+server_tokens off;
+sendfile on;
+#server { # root /var/www/demo; # index randeep.html; # location = /about { # try_files /about.html =404; # }
+#}
+
+        server {
+                location / {
+                        proxy_pass http://localhost:3000;
+                }
+        }
+
+}
+
+user www-data;
+worker_processes auto;
+
+events {
+worker_connections 768;
+}
+
+http {
+server_tokens off;
+sendfile on;
 server {
-listen 80 default_server;
-listen [::]:80 default_server;
+root /var/www/demo;
+index demo.html;
+location = /about {
+try_files /about.html =404;
+}
+}
 
-server*name *;
+        #server {
+        #       location / {
+        #               proxy_pass http://localhost:8000;
+        #       }
 
-listen 443 ssl;
-server_name localhost;
 
-ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 
-# Main proxy: use a variable so nginx uses the 'resolver' for DNS updates.
-
-location / {
-#set $upstream "app:3001";
-proxy_pass http://localhost:3001;
-
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Connection "";
-    proxy_buffers 8 16k;
-    proxy_buffer_size 32k;
-    proxy_read_timeout 90;
-    proxy_send_timeout 90;
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/greyghost-todo.work.gd/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/greyghost-todo.work.gd/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
 }
 
+        server {
+    if ($host = greyghost-todo.work.gd) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+
+
+                listen 80;
+                server_name greyghost-todo.work.gd www.greyghost-todo.work.gd;
+    return 404; # managed by Certbot
+
+}}
+
+user www-data;
+worker_processes auto;
+
+events {
+worker_connections 768;
 }
+
+http {
+server_tokens off;
+sendfile on;
+server {
+server_name greyghost-todo.work.gd www.greyghost-todo.work.gd;
+root /var/www/demo;
+index demo.html;
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/greyghost-todo.work.gd/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/greyghost-todo.work.gd/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+        server {
+    if ($host = greyghost-todo.work.gd) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+                listen 80;
+                server_name greyghost-todo.work.gd www.greyghost-todo.work.gd;
+    return 404; # managed by Certbot
+
+}}
